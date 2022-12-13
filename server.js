@@ -27,7 +27,7 @@ io.on("connection", (socket) => {
   );
 
   socket.on("message", (data) => {
-    log(`message from ${date.num}`);
+    log(`message from ${data.clientID} via socket id: ${socket.id}`);
     socket.broadcast.emit("message", data);
   });
 
@@ -37,7 +37,9 @@ io.on("connection", (socket) => {
   });
 
   /**them gi thi them o giua day */
-
+  socket.on("event_name", (data) => {
+    log(data)
+  })
   /**************************** */
   //xu ly chung
   socket.on("reconnect", function () {
