@@ -57,3 +57,4 @@ io.on("connection", (socket) => {
 server.listen(3000, () => {
   log("server is listening on port doi port di");
 });
+module.exports = server;
