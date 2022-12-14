@@ -1,4 +1,10 @@
 {
+  "name": "express-socketio-chatroom",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
   "engines": {
     "node": "16.14.2"
   },
