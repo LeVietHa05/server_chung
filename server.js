@@ -14,10 +14,23 @@ const io = new Server(server, {
   },
 });
 
+const fs = require("fs");
+
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
+});
+
+app.get("/chartData", (req, res) => {
+  fs.readFile("data.json", "utf8", (err, jsonString) => {
+    if (err) {
+      error("File read failed:", err);
+      return res.json({data: [], msg: "error"});
+    }
+    let dataJson = JSON.parse(jsonString);
+    res.json({data: dataJson.data, msg: "success"});
+  });
 });
 
 io.on("connection", (socket) => {
@@ -26,19 +39,38 @@ io.on("connection", (socket) => {
     socket.request.connection.remoteAddress
   );
 
-  socket.on("message", (data) => {
+  socket.on("/esp/envir", (data) => {
     log(`message from ${data.clientID} via socket id: ${socket.id}`);
-    socket.broadcast.emit("message", data);
+    socket.broadcast.emit("/web/envir", data);
   });
 
-  socket.on("UPDATE", (data) => {
-    log(`request update for person ${data}`);
-    socket.broadcast.emit("UPDATE", data);
-  });
-
-  /**them gi thi them o giua day */
-  socket.on("event_name", (data) => {
+  
+  socket.on("/esp/sleep", (data) => {
     log(data)
+    //add new data into data.json
+    //the data.json file look like: 
+    /**
+     * {
+     *  data:[{...},{...},{...}]
+     * }
+     */
+    
+    fs.readFile("data.json", "utf8", (err, jsonString) => {
+      if (err) {
+        error("File read failed:", err);
+        return;
+      }
+      let dataJson = JSON.parse(jsonString);
+      dataJson.data.push(data.msg);
+      fs.writeFile("data.json", JSON.stringify(dataJson), (err) => {
+        if (err) {
+          error("Error writing file", err);
+        } else {
+          log("Successfully wrote file");
+        }
+      });
+    });
+    socket.broadcast.emit("/web/sleep", 1);
   })
   /**************************** */
   //xu ly chung
